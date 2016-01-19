@@ -3,8 +3,8 @@ module NLPModels
 using JuMP
 using MathProgBase
 
-require(Pkg.dir("MathProgBase", "src", "NLP", "NLP.jl"))
-using NLP  # Defines NLPModelMeta.
+include(Pkg.dir("MathProgBase", "src", "NLP", "NLP.jl"))
+using .NLP  # Defines NLPModelMeta.
 
 export AbstractNLPModel, NLPModel,
        reset!,
@@ -29,23 +29,23 @@ type MathProgModel <: MathProgBase.AbstractMathProgModel
   status :: Symbol
 end
 
-MathProgBase.model(solver :: ModelReader) = MathProgModel(nothing,
-                                                          0,
-                                                          0,
-                                                          Float64[],
-                                                          Float64[],
-                                                          Float64[],
-                                                          Float64[],
-                                                          Float64[],
-                                                          Float64[],
-                                                          :Min,
-                                                          :Uninitialized);
+MathProgBase.NonlinearModel(solver :: ModelReader) = MathProgModel(nothing,
+                                                                   0,
+                                                                   0,
+                                                                   Float64[],
+                                                                   Float64[],
+                                                                   Float64[],
+                                                                   Float64[],
+                                                                   Float64[],
+                                                                   Float64[],
+                                                                   :Min,
+                                                                   :Uninitialized);
 
-function MathProgBase.loadnonlinearproblem!(m :: MathProgModel,
-                                            numVar, numConstr,
-                                            l, u, lb, ub,
-                                            sense,
-                                            eval :: MathProgBase.AbstractNLPEvaluator)
+function MathProgBase.loadproblem!(m :: MathProgModel,
+                                   numVar, numConstr,
+                                   l, u, lb, ub,
+                                   sense,
+                                   eval :: MathProgBase.AbstractNLPEvaluator)
 
   # TODO: :JacVec is not yet available.
   # [:Grad, :Jac, :JacVec, :Hess, :HessVec, :ExprGraph]
