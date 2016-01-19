@@ -2,6 +2,7 @@ module NLPModels
 
 using JuMP
 using MathProgBase
+using Compat
 
 include(Pkg.dir("MathProgBase", "src", "NLP", "NLP.jl"))
 using .NLP  # Defines NLPModelMeta.
@@ -16,7 +17,7 @@ type ModelReader <: MathProgBase.AbstractMathProgSolver
 end
 
 type MathProgModel <: MathProgBase.AbstractMathProgModel
-  eval :: Union(JuMPNLPEvaluator, Nothing)
+  eval :: @compat Union{JuMPNLPEvaluator, Void}
   numVar :: Int
   numConstr :: Int
   x :: Vector{Float64}
@@ -49,7 +50,7 @@ function MathProgBase.loadproblem!(m :: MathProgModel,
 
   # TODO: :JacVec is not yet available.
   # [:Grad, :Jac, :JacVec, :Hess, :HessVec, :ExprGraph]
-  MathProgBase.initialize(eval, [:Grad, :Jac, :Hess, :HessVec, :ExprGraph])
+  @compat MathProgBase.initialize(eval, collect([:Grad, :Jac, :Hess, :HessVec, :ExprGraph]))
   m.numVar = numVar
   m.numConstr = numConstr
   m.x = zeros(numVar)
@@ -116,21 +117,21 @@ function NLPModel(jmodel :: Model)
   nnzj = length(jrows)
   nnzh = length(hrows)
 
-  meta = NLPModelMeta(nvar,
-                      x0=mpmodel.x,
-                      lvar=lvar,
-                      uvar=uvar,
-                      ncon=ncon,
-                      y0=zeros(ncon),
-                      lcon=lcon,
-                      ucon=ucon,
-                      nnzj=nnzj,
-                      nnzh=nnzh,
-                      lin=[1:nlin],              # linear constraints appear first in JuMP
-                      nln=[nlin+1:ncon],
-                      minimize=(mpmodel.sense == :Min),
-                      islp=MathProgBase.isobjlinear(mpmodel.eval) & (nlin == ncon),
-                      )
+  meta = @compat NLPModelMeta(nvar,
+                              x0=mpmodel.x,
+                              lvar=lvar,
+                              uvar=uvar,
+                              ncon=ncon,
+                              y0=zeros(ncon),
+                              lcon=lcon,
+                              ucon=ucon,
+                              nnzj=nnzj,
+                              nnzh=nnzh,
+                              lin=collect(1:nlin),      # linear constraints appear first in JuMP
+                              nln=collect(nlin+1:ncon),
+                              minimize=(mpmodel.sense == :Min),
+                              islp=MathProgBase.isobjlinear(mpmodel.eval) & (nlin == ncon),
+                              )
 
   return NLPModel(meta,
                   jmodel,

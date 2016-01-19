@@ -53,7 +53,7 @@ function jump_vs_ampl_helper(nlp_jump, nlp_ampl; nloops=100, rtol=1.0e-10)
       @assert(norm(Hv_jump - Hv_ampl) <= rtol * max(norm(Hv_ampl), 1.0))
     end
   end
-  
+
 end
 
 function jump_vs_ampl(problem :: Symbol; nloops=100, rtol=1.0e-10)
@@ -69,7 +69,7 @@ function jump_vs_ampl(problem :: Symbol; nloops=100, rtol=1.0e-10)
   AmplNLReader.amplmodel_finalize(nlp_ampl)
 end
 
-problems = [:genrose, :hs006]
+problems = @compat collect([:genrose, :hs006])
 for problem in problems
   jump_vs_ampl(problem)
 end
